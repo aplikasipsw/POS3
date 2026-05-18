@@ -93,23 +93,23 @@ const Reports = () => {
     const headers = ["Tanggal", "Order ID", "Meja", "Detail Pesanan", "Subtotal", "Pajak", "Diskon", "Total", "Metode Pembayaran", "Status"];
     const rows = filteredData.map(t => [
       new Date(t.timestamp).toLocaleString('id-ID'),
-      t.orderId,
+      t.orderId || '-',
       t.table || '-',
-      t.items.replace(/\n/g, '; '),
-      t.subtotal,
-      t.tax,
+      t.items ? String(t.items).replace(/\n/g, '; ') : '-',
+      t.subtotal || 0,
+      t.tax || 0,
       t.discount || 0,
-      t.total,
-      t.paymentMethod,
-      t.status
+      t.total || 0,
+      t.paymentMethod || '-',
+      t.status || '-'
     ]);
 
-    const csvContent = "data:text/csv;charset=utf-8," 
-      + [headers.join(","), ...rows.map(e => e.map(val => `"${val}"`).join(","))].join("\n");
+    const csvContent = [headers.join(","), ...rows.map(e => e.map(val => `"${val}"`).join(","))].join("\n");
     
-    const encodedUri = encodeURI(csvContent);
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
+    link.setAttribute("href", url);
     link.setAttribute("download", `Laporan_POS_NasiGoreng_${filterRange}hari.csv`);
     document.body.appendChild(link);
     link.click();

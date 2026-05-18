@@ -256,7 +256,7 @@ export const useStore = create((set, get) => ({
       paymentMethod,
       table: activeTable ? activeTable.name : 'Take Away',
       notes,
-      status: 'Selesai'
+      status: 'Pending'
     };
 
     try {
