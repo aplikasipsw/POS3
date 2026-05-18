@@ -87,6 +87,7 @@ const POS = () => {
   };
 
   const handleCheckoutSubmit = () => {
+    const moneyReceivedNum = Number(moneyReceived) || 0;
     checkout(
       paymentMethod,
       discountVal,
@@ -96,7 +97,8 @@ const POS = () => {
         setCompletedOrderDetails({
           ...orderPayload,
           service: orderPayload.service,
-          total: orderPayload.total
+          total: orderPayload.total,
+          moneyReceived: moneyReceivedNum
         });
         setCheckoutSuccess(true);
         setIsPaymentOpen(false);
@@ -668,11 +670,11 @@ const POS = () => {
                     <>
                       <div className="flex justify-between text-gray-500 mt-1">
                         <span>Uang Diterima:</span>
-                        <span>Rp {(Number(moneyReceived) || 0).toLocaleString('id-ID')}</span>
+                        <span>Rp {(completedOrderDetails.moneyReceived || 0).toLocaleString('id-ID')}</span>
                       </div>
                       <div className="flex justify-between font-bold text-gray-950">
                         <span>Kembalian:</span>
-                        <span>Rp {(changeDue || 0).toLocaleString('id-ID')}</span>
+                        <span>Rp {Math.max(0, (completedOrderDetails.moneyReceived || 0) - (completedOrderDetails.total || 0)).toLocaleString('id-ID')}</span>
                       </div>
                     </>
                   )}
