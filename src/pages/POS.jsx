@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useStore } from '../store';
-import { Search, Plus, Minus, Trash2, CreditCard, Banknote, QrCode, ClipboardEdit, Receipt, CheckCircle } from 'lucide-react';
+import { Search, Plus, Minus, Trash2, CreditCard, Banknote, QrCode, ClipboardEdit, Receipt, CheckCircle, Smartphone } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const POS = () => {
@@ -95,8 +95,8 @@ const POS = () => {
         // Success
         setCompletedOrderDetails({
           ...orderPayload,
-          service,
-          total
+          service: orderPayload.service,
+          total: orderPayload.total
         });
         setCheckoutSuccess(true);
         setIsPaymentOpen(false);
@@ -643,36 +643,36 @@ const POS = () => {
                 <div className="space-y-1">
                   <div className="flex justify-between">
                     <span>Subtotal:</span>
-                    <span>Rp {completedOrderDetails.subtotal.toLocaleString('id-ID')}</span>
+                    <span>Rp {(completedOrderDetails.subtotal || 0).toLocaleString('id-ID')}</span>
                   </div>
                   <div className="flex justify-between">
                     <span>PPN ({settings.tax_rate || "11"}%):</span>
-                    <span>Rp {completedOrderDetails.tax.toLocaleString('id-ID')}</span>
+                    <span>Rp {(completedOrderDetails.tax || 0).toLocaleString('id-ID')}</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Service ({settings.service_rate || "5"}%):</span>
-                    <span>Rp {completedOrderDetails.service.toLocaleString('id-ID')}</span>
+                    <span>Rp {(completedOrderDetails.service || 0).toLocaleString('id-ID')}</span>
                   </div>
                   {completedOrderDetails.discount > 0 && (
                     <div className="flex justify-between text-red-500">
                       <span>Diskon:</span>
-                      <span>-Rp {completedOrderDetails.discount.toLocaleString('id-ID')}</span>
+                      <span>-Rp {(completedOrderDetails.discount || 0).toLocaleString('id-ID')}</span>
                     </div>
                   )}
                   <div className="flex justify-between font-extrabold text-xs text-gray-950 pt-1 border-t border-dashed border-gray-300 mt-1.5">
                     <span>Total Tagihan:</span>
-                    <span>Rp {completedOrderDetails.total.toLocaleString('id-ID')}</span>
+                    <span>Rp {(completedOrderDetails.total || 0).toLocaleString('id-ID')}</span>
                   </div>
 
                   {completedOrderDetails.paymentMethod === 'Tunai' && (
                     <>
                       <div className="flex justify-between text-gray-500 mt-1">
                         <span>Uang Diterima:</span>
-                        <span>Rp {Number(moneyReceived).toLocaleString('id-ID')}</span>
+                        <span>Rp {(Number(moneyReceived) || 0).toLocaleString('id-ID')}</span>
                       </div>
                       <div className="flex justify-between font-bold text-gray-950">
                         <span>Kembalian:</span>
-                        <span>Rp {changeDue.toLocaleString('id-ID')}</span>
+                        <span>Rp {(changeDue || 0).toLocaleString('id-ID')}</span>
                       </div>
                     </>
                   )}

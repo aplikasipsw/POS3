@@ -30,9 +30,11 @@ export const useStore = create((set, get) => ({
       // Fetch data staff dari API
       const res = await fetch(`${API_URL}?action=getStaff`);
       const json = await res.json();
-      
       if (json.status === 'success') {
-        const staff = json.data.find(s => s.email.toLowerCase() === email.toLowerCase() && String(s.password) === String(password));
+        const staff = json.data.find(s => {
+          const sEmail = s.email ? String(s.email).toLowerCase() : '';
+          return sEmail === email.toLowerCase() && String(s.password) === String(password);
+        });
         
         if (staff) {
           if (staff.status !== 'Aktif') {
@@ -248,6 +250,7 @@ export const useStore = create((set, get) => ({
       }),
       subtotal,
       tax,
+      service,
       discount,
       total,
       paymentMethod,
