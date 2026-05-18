@@ -208,23 +208,44 @@ export const useStore = create((set, get) => ({
       return;
     }
 
-    const subtotal = cart.reduce((acc, item) => acc + (item.price * item.qty), 0);
+    const subtotal = cart.reduce((acc, item) => {
+      const toppingsPrice = (item.toppings || []).reduce((sum, top) => {
+        if (top === 'Telor') return sum + 3000;
+        if (top === 'Sosis') return sum + 4000;
+        if (top === 'Bakso') return sum + 4000;
+        if (top === 'Keju') return sum + 5000;
+        return sum;
+      }, 0);
+      return acc + ((item.price + toppingsPrice) * item.qty);
+    }, 0);
+
     const taxRate = parseFloat(get().settings.tax_rate || "11") / 100;
     const tax = subtotal * taxRate;
-    const total = subtotal + tax - discount;
+    const serviceRate = parseFloat(get().settings.service_rate || "5") / 100;
+    const service = subtotal * serviceRate;
+    const total = subtotal + tax + service - discount;
 
     const payload = {
       orderId: `NG-${new Date().getTime().toString().slice(-6)}`,
-      items: cart.map(i => ({
-        id: i.id,
-        name: i.name,
-        category: i.category,
-        price: i.price,
-        qty: i.qty,
-        spicyLevel: i.spicyLevel,
-        toppings: i.toppings,
-        notes: i.notes
-      })),
+      items: cart.map(i => {
+        const toppingsPrice = (i.toppings || []).reduce((sum, top) => {
+          if (top === 'Telor') return sum + 3000;
+          if (top === 'Sosis') return sum + 4000;
+          if (top === 'Bakso') return sum + 4000;
+          if (top === 'Keju') return sum + 5000;
+          return sum;
+        }, 0);
+        return {
+          id: i.id,
+          name: i.name,
+          category: i.category,
+          price: i.price + toppingsPrice,
+          qty: i.qty,
+          spicyLevel: i.spicyLevel,
+          toppings: i.toppings,
+          notes: i.notes
+        };
+      }),
       subtotal,
       tax,
       discount,
