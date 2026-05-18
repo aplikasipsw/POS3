@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useStore } from '../store';
 import { ChefHat, Timer, Check, Flame, Award, BellRing } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { API_URL } from '../config';
 
 const Kitchen = () => {
   const { transactions, fetchTransactions, isLoading } = useStore();
@@ -78,9 +79,9 @@ const Kitchen = () => {
         status: newStatus
       };
 
-      const res = await fetch(useStore.getState().settings.api_url || "https://script.google.com/macros/s/AKfycbyU1l4Oa5hKnYv61MivYYvqpxK5jfVufsNIiWtPU5njzTF1TDIGtV-96A-lHa1aDDwdng/exec", {
+      const res = await fetch(API_URL, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'text/plain' },
         body: JSON.stringify({ action: 'addTransaction', payload })
       });
       const json = await res.json();

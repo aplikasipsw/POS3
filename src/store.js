@@ -238,7 +238,7 @@ export const useStore = create((set, get) => ({
     try {
       const res = await fetch(API_URL, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'text/plain' },
         body: JSON.stringify({ action: 'addTransaction', payload })
       });
       const json = await res.json();
@@ -263,7 +263,7 @@ export const useStore = create((set, get) => ({
     try {
       const res = await fetch(API_URL, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'text/plain' },
         body: JSON.stringify({ action: 'updateTableStatus', payload: tableDetails })
       });
       const json = await res.json();
@@ -280,7 +280,7 @@ export const useStore = create((set, get) => ({
     try {
       const res = await fetch(API_URL, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'text/plain' },
         body: JSON.stringify({ action: 'saveMenu', payload: menuItem })
       });
       const json = await res.json();
@@ -300,7 +300,7 @@ export const useStore = create((set, get) => ({
     try {
       const res = await fetch(API_URL, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'text/plain' },
         body: JSON.stringify({ action: 'deleteMenu', payload: { id: menuId } })
       });
       const json = await res.json();
@@ -320,7 +320,7 @@ export const useStore = create((set, get) => ({
     try {
       const res = await fetch(API_URL, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'text/plain' },
         body: JSON.stringify({ action: 'saveStaff', payload: staffItem })
       });
       const json = await res.json();
@@ -340,7 +340,7 @@ export const useStore = create((set, get) => ({
     try {
       const res = await fetch(API_URL, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'text/plain' },
         body: JSON.stringify({ action: 'deleteStaff', payload: { id: staffId } })
       });
       const json = await res.json();
@@ -360,7 +360,7 @@ export const useStore = create((set, get) => ({
     try {
       const res = await fetch(API_URL, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'text/plain' },
         body: JSON.stringify({ action: 'saveSettings', payload: settingsObj })
       });
       const json = await res.json();
@@ -380,7 +380,7 @@ export const useStore = create((set, get) => ({
     try {
       const res = await fetch(API_URL, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'text/plain' },
         body: JSON.stringify({ action: 'saveInventory', payload: inventoryItem })
       });
       const json = await res.json();

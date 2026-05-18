@@ -33,9 +33,13 @@ const Reports = () => {
       }
 
       // Filter Search
-      const matchSearch = t.orderId.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                          t.items.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          (t.table && t.table.toLowerCase().includes(searchQuery.toLowerCase()));
+      const orderIdStr = t.orderId ? String(t.orderId) : '';
+      const itemsStr = t.items ? String(t.items) : '';
+      const tableStr = t.table ? String(t.table) : '';
+
+      const matchSearch = orderIdStr.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                          itemsStr.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                          tableStr.toLowerCase().includes(searchQuery.toLowerCase());
       
       return matchSearch;
     });
