@@ -96,6 +96,7 @@ const POS = () => {
         // Success
         setCompletedOrderDetails({
           ...orderPayload,
+          items: orderPayload.rawItemsJson ? JSON.parse(orderPayload.rawItemsJson) : [],
           service: orderPayload.service,
           total: orderPayload.total,
           moneyReceived: moneyReceivedNum

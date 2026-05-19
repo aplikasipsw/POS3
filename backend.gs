@@ -19,6 +19,9 @@ const SHEETS = {
 // --- MAIN ENTRY POINTS ---
 
 function doGet(e) {
+  if (!e || !e.parameter) {
+    return jsonResponse({ status: 'error', message: 'Fungsi doGet tidak bisa dijalankan langsung dari editor. Silakan rilis sebagai Web App dan akses menggunakan URL API.' });
+  }
   const action = e.parameter.action;
   let result;
 
@@ -55,6 +58,9 @@ function doGet(e) {
 }
 
 function doPost(e) {
+  if (!e || !e.postData) {
+    return jsonResponse({ status: 'error', message: 'Fungsi doPost tidak bisa dijalankan langsung dari editor. Silakan rilis sebagai Web App dan akses menggunakan URL API.' });
+  }
   try {
     initSheets();
     const data = JSON.parse(e.postData.contents);
@@ -78,6 +84,9 @@ function doPost(e) {
         break;
       case 'updateTableStatus':
         result = handleUpdateTableStatus(payload);
+        break;
+      case 'updateTransactionStatus':
+        result = handleUpdateTransactionStatus(payload);
         break;
       case 'saveStaff':
         result = handleSaveRecord(SHEETS.STAFF, payload, 'id');
@@ -107,15 +116,26 @@ function handleAddTransaction(payload) {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   const sheet = ss.getSheetByName(SHEETS.TRANSACTIONS);
 
-  // Format list items menjadi string ringkas untuk dibaca di spreadsheet
-  const itemsText = payload.items.map(item => {
-    let opts = [];
-    if (item.spicyLevel !== undefined) opts.push(`Lvl ${item.spicyLevel}`);
-    if (item.toppings && item.toppings.length > 0) opts.push(`Top: ${item.toppings.join(',')}`);
-    if (item.notes) opts.push(`Note: ${item.notes}`);
-    
-    return `${item.name} (${item.qty}x)${opts.length > 0 ? ' [' + opts.join(' | ') + ']' : ''}`;
-  }).join('\n');
+  let itemsText = '';
+  let itemsArray = [];
+  if (Array.isArray(payload.items)) {
+    itemsArray = payload.items;
+    itemsText = payload.items.map(item => {
+      let opts = [];
+      if (item.spicyLevel !== undefined) opts.push(`Lvl ${item.spicyLevel}`);
+      if (item.toppings && item.toppings.length > 0) opts.push(`Top: ${item.toppings.join(',')}`);
+      if (item.notes) opts.push(`Note: ${item.notes}`);
+      
+      return `${item.name} (${item.qty}x)${opts.length > 0 ? ' [' + opts.join(' | ') + ']' : ''}`;
+    }).join('\n');
+  } else if (typeof payload.items === 'string') {
+    itemsText = payload.items;
+    try {
+      itemsArray = payload.rawItemsJson ? JSON.parse(payload.rawItemsJson) : [];
+    } catch(e) {
+      itemsArray = [];
+    }
+  }
 
   // Insert row baru
   const timestamp = new Date();
@@ -131,19 +151,19 @@ function handleAddTransaction(payload) {
     payload.status || 'Selesai',
     payload.table || 'Take Away',
     payload.notes || '',
-    JSON.stringify(payload.items) // data asli JSON untuk keperluan frontend jika diperlukan
+    payload.rawItemsJson || JSON.stringify(itemsArray) // data asli JSON untuk keperluan frontend jika diperlukan
   ]);
 
   // 1. Pengurangan Stok Menu otomatis
   try {
     const menuSheet = ss.getSheetByName(SHEETS.MENU);
     const menuData = menuSheet.getDataRange().getValues();
-    payload.items.forEach(orderedItem => {
+    itemsArray.forEach(orderedItem => {
       for (let i = 1; i < menuData.length; i++) {
         if (String(menuData[i][0]) === String(orderedItem.id)) {
-          const currentStock = Number(menuData[i][4]) || 0;
+          const currentStock = Number(menuData[i][5]) || 0;
           const newStock = Math.max(0, currentStock - orderedItem.qty);
-          menuSheet.getRange(i + 1, 5).setValue(newStock); // update kolom stock (kolom ke-5)
+          menuSheet.getRange(i + 1, 6).setValue(newStock); // update kolom stock (kolom ke-6)
           
           // Auto nonaktifkan jika habis
           if (newStock === 0) {
@@ -163,7 +183,7 @@ function handleAddTransaction(payload) {
     const invSheet = ss.getSheetByName(SHEETS.INVENTORY);
     if (invSheet) {
       const invData = invSheet.getDataRange().getValues();
-      payload.items.forEach(orderedItem => {
+      itemsArray.forEach(orderedItem => {
         let isNasiGoreng = orderedItem.category === 'Nasi Goreng';
         let isMieGoreng = orderedItem.category === 'Mie Goreng';
 
@@ -214,6 +234,19 @@ function handleUpdateTableStatus(payload) {
     }
   }
   return { status: 'error', message: 'Table not found' };
+}
+
+function handleUpdateTransactionStatus(payload) {
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SHEETS.TRANSACTIONS);
+  const data = sheet.getDataRange().getValues();
+
+  for (let i = 1; i < data.length; i++) {
+    if (String(data[i][1]) === String(payload.orderId)) {
+      sheet.getRange(i + 1, 9).setValue(payload.status); // Update status in column 9
+      return { status: 'success', orderId: payload.orderId, newStatus: payload.status };
+    }
+  }
+  return { status: 'error', message: 'Transaction not found' };
 }
 
 function handleSaveRecord(sheetName, payload, keyColumnName) {
@@ -286,6 +319,10 @@ function getSettingsAsObject() {
 }
 
 function handleSaveSettings(payload) {
+  if (!payload) {
+    console.warn("Payload is undefined. Do not run handleSaveSettings directly from the editor.");
+    return { status: 'error', message: 'Payload is undefined' };
+  }
   const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SHEETS.SETTINGS);
   
   // payload adalah object key-value

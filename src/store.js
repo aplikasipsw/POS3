@@ -227,27 +227,38 @@ export const useStore = create((set, get) => ({
     const service = subtotal * serviceRate;
     const total = subtotal + tax + service - discount;
 
+    const rawItemsArray = cart.map(i => {
+      const toppingsPrice = (i.toppings || []).reduce((sum, top) => {
+        if (top === 'Telor') return sum + 3000;
+        if (top === 'Sosis') return sum + 4000;
+        if (top === 'Bakso') return sum + 4000;
+        if (top === 'Keju') return sum + 5000;
+        return sum;
+      }, 0);
+      return {
+        id: i.id,
+        name: i.name,
+        category: i.category,
+        price: i.price + toppingsPrice,
+        qty: i.qty,
+        spicyLevel: i.spicyLevel,
+        toppings: i.toppings,
+        notes: i.notes
+      };
+    });
+
+    const itemsString = rawItemsArray.map(i => {
+      let text = `${i.name} (${i.qty}x)`;
+      if (i.spicyLevel !== undefined) text += `\n- Lvl: ${i.spicyLevel}`;
+      if (i.toppings && i.toppings.length > 0) text += `\n- Topping: ${i.toppings.join(', ')}`;
+      if (i.notes) text += `\n- Note: ${i.notes}`;
+      return text;
+    }).join('\n\n');
+
     const payload = {
       orderId: `NG-${new Date().getTime().toString().slice(-6)}`,
-      items: cart.map(i => {
-        const toppingsPrice = (i.toppings || []).reduce((sum, top) => {
-          if (top === 'Telor') return sum + 3000;
-          if (top === 'Sosis') return sum + 4000;
-          if (top === 'Bakso') return sum + 4000;
-          if (top === 'Keju') return sum + 5000;
-          return sum;
-        }, 0);
-        return {
-          id: i.id,
-          name: i.name,
-          category: i.category,
-          price: i.price + toppingsPrice,
-          qty: i.qty,
-          spicyLevel: i.spicyLevel,
-          toppings: i.toppings,
-          notes: i.notes
-        };
-      }),
+      items: itemsString,
+      rawItemsJson: JSON.stringify(rawItemsArray),
       subtotal,
       tax,
       service,
@@ -256,7 +267,8 @@ export const useStore = create((set, get) => ({
       paymentMethod,
       table: activeTable ? activeTable.name : 'Take Away',
       notes,
-      status: 'Pending'
+      status: 'Pending',
+      timestamp: new Date().toISOString()
     };
 
     try {

@@ -82,7 +82,7 @@ const Kitchen = () => {
       const res = await fetch(API_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'text/plain' },
-        body: JSON.stringify({ action: 'addTransaction', payload })
+        body: JSON.stringify({ action: 'updateTransactionStatus', payload })
       });
       const json = await res.json();
       
